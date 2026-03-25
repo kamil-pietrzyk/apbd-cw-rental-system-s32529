@@ -9,9 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Exceptions\" />
-      <Folder Include="Policies\" />
-      <Folder Include="Services\" />
       <Folder Include="UI\" />
     </ItemGroup>
 

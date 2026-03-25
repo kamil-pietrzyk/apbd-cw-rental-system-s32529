@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using apbd_cw_rental_system_s32529.Domain.Equipment;
+﻿using apbd_cw_rental_system_s32529.Domain.Equipment;
 using apbd_cw_rental_system_s32529.Domain.Rentals;
 using apbd_cw_rental_system_s32529.Domain.Users;
 using apbd_cw_rental_system_s32529.Exceptions;
@@ -42,16 +39,16 @@ public class RentalService(IPenaltyCalculator penaltyCalculator)
 
         return rental;
     }
-
-    public void ReturnEquipment(Guid rentalId)
+    
+    public void ReturnEquipment(Guid rentalId, DateTime? simulatedReturnDate = null)
     {
         var rental = _rentals.FirstOrDefault(r => r.Id == rentalId) 
                      ?? throw new DomainException("Rental not found.");
 
         if (!rental.IsActive)
             throw new DomainException("This rental is already closed.");
-
-        var returnDate = DateTime.Now;
+        
+        var returnDate = simulatedReturnDate ?? DateTime.Now;
         var penalty = penaltyCalculator.CalculatePenalty(rental.DueDate, returnDate);
 
         rental.CompleteReturn(returnDate, penalty);
