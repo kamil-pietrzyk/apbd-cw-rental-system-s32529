@@ -9,9 +9,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Domain\Equipment\" />
-      <Folder Include="Domain\Rentals\" />
-      <Folder Include="Domain\Users\" />
       <Folder Include="Exceptions\" />
       <Folder Include="Policies\" />
       <Folder Include="Services\" />
