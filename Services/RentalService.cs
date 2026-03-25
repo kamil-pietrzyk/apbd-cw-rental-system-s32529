@@ -37,7 +37,7 @@ public class RentalService(IPenaltyCalculator penaltyCalculator)
 
         // Tworzymy wypożyczenie i oznaczamy sprzęt
         var rental = new Rental(user, equipment, DateTime.Now, duration);
-        equipment.MarkAsUnavailable(); // Ukrywamy dostępność
+        equipment.MarkAsUnavailable();
         _rentals.Add(rental);
 
         return rental;
@@ -52,9 +52,40 @@ public class RentalService(IPenaltyCalculator penaltyCalculator)
             throw new DomainException("This rental is already closed.");
 
         var returnDate = DateTime.Now;
-        var penalty = penaltyCalculator.CalculatePenalty(rental.DueDate, returnDate); // [cite: 47]
+        var penalty = penaltyCalculator.CalculatePenalty(rental.DueDate, returnDate);
 
         rental.CompleteReturn(returnDate, penalty);
-        rental.Item.MarkAsAvailable(); // Sprzęt wraca do puli dostępnych
+        rental.Item.MarkAsAvailable();
+    }
+    
+    // Oznaczenie sprzętu jako niedostępnego (np. uszkodzenie)
+    public void DisableEquipment(Guid equipmentId)
+    {
+        var equipment = _equipment.FirstOrDefault(e => e.Id == equipmentId) 
+                        ?? throw new EquipmentNotFoundException("Equipment not found.");
+        equipment.MarkAsUnavailable();
+    }
+    
+    public IEnumerable<EquipmentItem> GetAllEquipment() => _equipment;
+    
+    public IEnumerable<EquipmentItem> GetAvailableEquipment() => _equipment.Where(e => e.IsAvailable);
+    
+    public IEnumerable<Rental> GetActiveRentalsForUser(Guid userId) 
+        => _rentals.Where(r => r.Borrower.Id == userId && r.IsActive);
+    
+    public IEnumerable<Rental> GetOverdueRentals() 
+        => _rentals.Where(r => r.IsOverdue);
+
+    // Pobranie wszystkich użytkowników (przydatne do UI)
+    public IEnumerable<User> GetAllUsers() => _users;
+    
+    public (int TotalEquipment, int AvailableEquipment, int ActiveRentals, int OverdueRentals) GenerateSummaryReport()
+    {
+        return (
+            TotalEquipment: _equipment.Count,
+            AvailableEquipment: _equipment.Count(e => e.IsAvailable),
+            ActiveRentals: _rentals.Count(r => r.IsActive),
+            OverdueRentals: _rentals.Count(r => r.IsOverdue)
+        );
     }
 }
