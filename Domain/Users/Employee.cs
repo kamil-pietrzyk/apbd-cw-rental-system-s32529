@@ -2,5 +2,5 @@
 
 public class Employee(string firstName, string lastName) : User(firstName, lastName)
 {
-    public override int MaxConcurrentRentals => 5; // Limit dla pracownika [cite: 44]
+    public override int MaxConcurrentRentals => 5; // Limit dla pracownika
 }

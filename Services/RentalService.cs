@@ -18,7 +18,7 @@ public class RentalService(IPenaltyCalculator penaltyCalculator)
     public Rental RentEquipment(Guid userId, Guid equipmentId, TimeSpan duration)
     {
         var user = _users.FirstOrDefault(u => u.Id == userId) 
-                   ?? throw new DomainException("User not found.");
+                   ?? throw new UserNotFoundException("User not found.");
         
         var equipment = _equipment.FirstOrDefault(e => e.Id == equipmentId) 
                         ?? throw new EquipmentNotFoundException("Equipment not found.");
@@ -43,12 +43,16 @@ public class RentalService(IPenaltyCalculator penaltyCalculator)
     public void ReturnEquipment(Guid rentalId, DateTime? simulatedReturnDate = null)
     {
         var rental = _rentals.FirstOrDefault(r => r.Id == rentalId) 
-                     ?? throw new DomainException("Rental not found.");
+                     ?? throw new UnknownRentalException("Rental not found.");
 
         if (!rental.IsActive)
-            throw new DomainException("This rental is already closed.");
+            throw new ClosedRentalException("This rental is already closed.");
         
         var returnDate = simulatedReturnDate ?? DateTime.Now;
+        
+        if (returnDate < rental.RentDate)
+            throw new ReturnBeforeRentalException("Data zwrotu nie może być wcześniejsza niż data wypożyczenia!");
+        
         var penalty = penaltyCalculator.CalculatePenalty(rental.DueDate, returnDate);
 
         rental.CompleteReturn(returnDate, penalty);
@@ -73,7 +77,7 @@ public class RentalService(IPenaltyCalculator penaltyCalculator)
     public IEnumerable<Rental> GetOverdueRentals() 
         => _rentals.Where(r => r.IsOverdue);
 
-    // Pobranie wszystkich użytkowników (przydatne do UI)
+    // Pobranie wszystkich użytkowników
     public IEnumerable<User> GetAllUsers() => _users;
     
     public (int TotalEquipment, int AvailableEquipment, int ActiveRentals, int OverdueRentals) GenerateSummaryReport()

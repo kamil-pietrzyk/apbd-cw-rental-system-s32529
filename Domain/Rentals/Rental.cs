@@ -8,9 +8,10 @@ public class Rental(User borrower, EquipmentItem item, DateTime rentDate, TimeSp
     public Guid Id { get; } = Guid.NewGuid();
     public User Borrower { get; } = borrower;
     public EquipmentItem Item { get; } = item;
+    // Zostawione ze względu na to, że "obiekt ma opisywać moment wypożyczenia".
     public DateTime RentDate { get; } = rentDate;
     public DateTime DueDate { get; } = rentDate.Add(duration);
-    public DateTime? ReturnDate { get; private set; }
+    private DateTime? ReturnDate { get; set; }
     public decimal PenaltyFee { get; private set; }
     
     public bool IsActive => ReturnDate == null;

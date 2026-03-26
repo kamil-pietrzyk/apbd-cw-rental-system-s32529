@@ -2,5 +2,5 @@
 
 public class Student(string firstName, string lastName) : User(firstName, lastName)
 {
-    public override int MaxConcurrentRentals => 2; // Limit dla studenta [cite: 43]
+    public override int MaxConcurrentRentals => 2; // Limit dla studenta
 }
